@@ -10,6 +10,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Fix line endings
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git rm --cached -r .
+          git reset --hard
 
       - name: Process Issue and Call API Gateway
         env:
