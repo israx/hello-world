@@ -20,13 +20,12 @@ jobs:
         env:
           API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
         run: |
-          # Prepare GitHub event data as JSON payload
-          event_json='${{ toJSON(github.event) }}'
           
           # Call API Gateway and trigger Lambda
           response=$(curl -X POST "$API_GATEWAY_URL" \
+            -H "Accept: */*" \
             -H "Content-Type: application/json" \
-            -d "$event_json")
+            -d "${{ toJSON(github.event) }}")
           
           echo "HTTP Status Code: $response"
           
