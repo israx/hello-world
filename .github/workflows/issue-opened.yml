@@ -1,0 +1,52 @@
+name: Process New Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  process-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Prepare issue data
+        id: prepare_data
+        run: |
+          issue_number="${{ github.event.issue.number }}"
+          issue_title="${{ github.event.issue.title }}"
+          issue_body="${{ github.event.issue.body }}"
+          
+          # Escape special characters in the issue body
+          issue_body_escaped=$(echo "$issue_body" | jq -sRr @uri)
+          
+          # Construct the JSON payload
+          json_payload=$(jq -n \
+            --arg num "$issue_number" \
+            --arg title "$issue_title" \
+            --arg body "$issue_body_escaped" \
+            '{issue_number: $num, issue_title: $title, issue_body: $body}')
+          
+          # Save the payload to a file
+          echo "$json_payload" > payload.json
+
+      - name: Call API Gateway and trigger Lambda
+        env:
+          API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          response=$(curl -s -o response.txt -w "%{http_code}" \
+            -X POST "$API_GATEWAY_URL" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $API_KEY" \
+            -d @payload.json)
+          
+          echo "HTTP Status Code: $response"
+          echo "Response Body:"
+          cat response.txt
+          
+          if [ "$response" -ne 200 ]; then
+            echo "Error: API request failed"
+            exit 1
+          fi
