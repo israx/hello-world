@@ -1,59 +1,37 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
-import axios from 'axios';
-import { createPrompt, getGhIssueMetadata } from "./helpers";
-
-const bedrock = new BedrockRuntimeClient({ region: "us-east-1" }); // replace with your region
+import { commentOnIssue, getGhIssueMetadata, processIssue } from "./helpers";
 
 export const handler = async (event:any) => {
   try {
     // Extract issue metadata from the event
-    const metadata = getGhIssueMetadata(event);
+    const metadata = await getGhIssueMetadata(event);
 
-    // Get relevant information and create prompt
-    const prompt = createPrompt(metadata.issueBody);
+    console.log("issue metadata", JSON.stringify(metadata, null, 2));
+ 
+    if (
+      metadata.labels?.includes('solved') || 
+      metadata.labels?.includes('pending-maintainer-response') || 
+      !metadata.isTicketOwner) 
+      {
+      console.log('Issue has solved or pending-maintainer-response label. Stopping execution.');
+      return { statusCode: 200, body: JSON.stringify({ message: 'Skipped due to issue labels' }) };
+    }
 
     // Call Bedrock
-    const params = {
-      modelId: "anthropic.claude-v2", // or another suitable model
-      contentType: "application/json",
-      accept: "application/json",
-      body: JSON.stringify({
-        prompt,
-        max_tokens_to_sample: 500,
-        temperature: 0.7,
-        top_p: 1,
-      }),
-    };
-
-    const command = new InvokeModelCommand(params);
-    const response = await bedrock.send(command);
-
-    // Parse the response
-    const bedrockResponse = JSON.parse(new TextDecoder().decode(response.body)).completion;
-
-    console.log ("bedrock response", bedrockResponse);
+    const response = await  processIssue(metadata);
+    console.log ("bedrock response", response);
 
     // Post the response back to GitHub
-    const { GITHUB_TOKEN } = process.env;
-    const { url: issueUrl } = JSON.parse(event.body).issue;
-    await axios.post(`${issueUrl}/comments`, {
-      body: bedrockResponse
-    }, {
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
+    await commentOnIssue(metadata, response);
 
     return {
       statusCode: 200,
       body: JSON.stringify('Response posted successfully')
     };
-  } catch (error) {
+  } catch (error:any) {
     console.error('Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify('Error processing request')
+      body: JSON.stringify(`Error processing request: ${error?.message}`)
     };
   }
 };

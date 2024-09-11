@@ -10,16 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@octokit/rest": "^21.0.2",
     "aws-amplify": "^6.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.645.0",
     "@aws-amplify/backend": "^1.2.1",
     "@aws-amplify/backend-cli": "^1.2.5",
     "@aws-cdk/aws-apigateway": "^1.204.0",
     "@aws-cdk/aws-iam": "^1.204.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.645.0",
     "@eslint/js": "^9.9.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

@@ -1,7 +1,7 @@
 import { defineBackend } from '@aws-amplify/backend';
 import { ghIssueLambda } from './functions/bedrock/resource';
 import { RestApi, LambdaIntegration, AuthorizationType } from 'aws-cdk-lib/aws-apigateway';
-import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 
 
 /**
@@ -12,13 +12,22 @@ const backend = defineBackend({
 });
 
 const ghIssueLambdaStack = backend.createStack('ghIssueLambdaStack');
-
+// 0. Grant lambda permission to call Bedrock
+backend.ghIssueLambda.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions:["bedrock:InvokeModel"],
+    resources: [
+      `arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0`,
+    ],
+  })
+)
 // 1. Create API Gateway
 const api = new RestApi(ghIssueLambdaStack, 'GhIssueApi', {
   restApiName: 'GitHub Issue API',
   description: 'This service handles GitHub issue webhooks.',
   defaultMethodOptions:
-    { authorizationType: AuthorizationType.IAM },
+    { authorizationType: AuthorizationType.NONE },
 });
 
 const integration = new LambdaIntegration(backend.ghIssueLambda.resources.lambda);
@@ -32,7 +41,8 @@ const apiGatewayRole = new Role(ghIssueLambdaStack, 'ApiGatewayRole', {
 
 apiGatewayRole.addToPolicy(
   new PolicyStatement({
-    resources: [backend.ghIssueLambda.resources.lambda.functionArn],
+    effect: Effect.ALLOW,
+    resources: ['*'],
     actions: ['lambda:InvokeFunction'],
   })
 );
