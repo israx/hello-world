@@ -8,47 +8,26 @@ jobs:
   process-issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '18'
 
-      - name: Fix line endings
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-          git rm --cached -r .
-          git reset --hard
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Process Issue and Call API Gateway
         env:
           API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
         run: |
-          # Prepare issue data
-          issue_number="${{ github.event.issue.number }}"
-          issue_title="${{ github.event.issue.title }}"
-          issue_body="${{ github.event.issue.body }}"
-          
-          # Escape special characters in the issue body
-          issue_body_escaped=$(echo "$issue_body" | jq -sRr @uri)
-          
-          # Construct the JSON payload
-          json_payload=$(jq -n \
-            --arg num "$issue_number" \
-            --arg title "$issue_title" \
-            --arg body "$issue_body_escaped" \
-            '{issue_number: $num, issue_title: $title, issue_body: $body}')
+          # Prepare GitHub event data as JSON payload
+          event_json='${{ toJSON(github.event) }}'
           
           # Call API Gateway and trigger Lambda
           response=$(curl -s -o response.txt -w "%{http_code}" \
             -X POST "$API_GATEWAY_URL" \
             -H "Content-Type: application/json" \
-            -d "$json_payload")
+            -d "$event_json")
           
           echo "HTTP Status Code: $response"
           echo "Response Body:"
