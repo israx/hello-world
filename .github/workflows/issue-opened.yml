@@ -24,14 +24,11 @@ jobs:
           event_json='${{ toJSON(github.event) }}'
           
           # Call API Gateway and trigger Lambda
-          response=$(curl -s -o response.txt -w "%{http_code}" \
-            -X POST "$API_GATEWAY_URL" \
+          response=$(curl -X POST "$API_GATEWAY_URL" \
             -H "Content-Type: application/json" \
             -d "$event_json")
           
           echo "HTTP Status Code: $response"
-          echo "Response Body:"
-          cat response.txt
           
           if [ "$response" -ne 200 ]; then
             echo "Error: API request failed"
