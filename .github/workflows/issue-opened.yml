@@ -11,7 +11,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -22,15 +22,7 @@ jobs:
         run: |
           # Prepare GitHub event data as JSON payload
           event_json='${{ toJSON(github.event) }}'
-          
-          # Call API Gateway and trigger Lambda
-          response=$(curl -X POST "$API_GATEWAY_URL" \
-            -H "Content-Type: application/json" \
-            -d "$event_json")
-          
-          echo "HTTP Status Code: $response"
-          
-          if [ "$response" -ne 200 ]; then
-            echo "Error: API request failed"
-            exit 1
-          fi
+
+          curl -X POST "$API_GATEWAY_URL" \
+               -H "Content-Type: application/json" \
+               -d "$event_json"
