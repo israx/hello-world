@@ -19,10 +19,8 @@ jobs:
       - name: Process Issue and Call API Gateway
         env:
           API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
+          GITHUB_EVENT: ${{ toJSON(github.event) }}
         run: |
-          # Prepare GitHub event data as JSON payload
-          event_json=$(jq -c . <<< '${{ toJSON(github.event) }}')
-
           curl -X POST "$API_GATEWAY_URL" \
                -H "Content-Type: application/json" \
-               -d "$event_json"
+               -d "$GITHUB_EVENT"
