@@ -21,7 +21,7 @@ jobs:
           API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
         run: |
           # Prepare GitHub event data as JSON payload
-          event_json='${{ toJSON(github.event) }}'
+          event_json=$(jq -c . <<< '${{ toJSON(github.event) }}')
 
           curl -X POST "$API_GATEWAY_URL" \
                -H "Content-Type: application/json" \
