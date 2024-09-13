@@ -1,0 +1,26 @@
+name: Process Issue Comment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  process-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Process Comment and Call API Gateway
+        env:
+          API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
+          GITHUB_EVENT: ${{ toJSON(github.event) }}
+        run: |
+          curl -X POST "$API_GATEWAY_URL" \
+               -H "Content-Type: application/json" \
+               -d "$GITHUB_EVENT"
