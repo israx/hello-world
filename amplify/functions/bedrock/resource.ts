@@ -1,10 +1,10 @@
 import { defineFunction } from "@aws-amplify/backend";
 
 export const ghIssueLambda = defineFunction({
-    name: 'gh-issue-lambda-resolver',
-    timeoutSeconds: 20,
+    name: 'issue-lambda-resolver',
+    timeoutSeconds: 60,
+    memoryMB: 1024,
     environment: {
-        GITHUB_WEBHOOK_SECRET: '*******',
-        GITHUB_TOKEN: '******',
+        GITHUB_TOKEN: '',
     }
 })

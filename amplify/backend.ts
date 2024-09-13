@@ -25,9 +25,9 @@ backend.ghIssueLambda.resources.lambda.addToRolePolicy(
 // 1. Create API Gateway
 const api = new RestApi(ghIssueLambdaStack, 'GhIssueApi', {
   restApiName: 'GitHub Issue API',
-  description: 'This service handles GitHub issue webhooks.',
+  description: 'This service handles GitHub actions.',
   defaultMethodOptions:
-    { authorizationType: AuthorizationType.NONE },
+    { authorizationType: AuthorizationType.NONE  },
 });
 
 const integration = new LambdaIntegration(backend.ghIssueLambda.resources.lambda);
@@ -51,6 +51,7 @@ backend.addOutput({
   custom:{
     apiGateway:{
       url: api.url
+    
     }
   }
 })

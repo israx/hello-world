@@ -1,0 +1,21 @@
+export enum IssueBodyFields {
+    JAVASCRIPT_FRAMEWORK = 'JavaScript Framework',
+    AMPLIFY_APIS = 'Amplify APIs',
+    AMPLIFY_VERSION = 'Amplify Version',
+    AMPLIFY_CATEGORIES = 'Amplify Categories',
+    BACKEND = 'Backend',
+    ENVIRONMENT_INFORMATION = 'Environment information',
+    DESCRIBE_THE_BUG = 'Describe the bug',
+    EXPECTED_BEHAVIOR = 'Expected behavior',
+    REPRODUCTION_STEPS = 'Reproduction steps',
+    CODE_SNIPPET = 'Code Snippet',
+    LOG_OUTPUT = 'Log output',
+    AWS_EXPORTS_JS = 'aws-exports.js',
+    MANUAL_CONFIGURATION = 'Manual configuration',
+    ADDITIONAL_CONFIGURATION = 'Additional configuration',
+    MOBILE_DEVICE = 'Mobile Device',
+    MOBILE_OPERATING_SYSTEM = 'Mobile Operating System',
+    MOBILE_BROWSER = 'Mobile Browser',
+    MOBILE_BROWSER_VERSION = 'Mobile Browser Version',
+    ADDITIONAL_INFORMATION_AND_SCREENSHOTS = 'Additional information and screenshots'
+}
