@@ -18,7 +18,7 @@ jobs:
 
       - name: Process Issue and Call API Gateway
         env:
-          API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL }}
+          API_GATEWAY_URL: https://jiib5ptc4k.execute-api.us-east-1.amazonaws.com/prod/
           GITHUB_EVENT: ${{ toJSON(github.event) }}
         run: |
           curl -X POST "$API_GATEWAY_URL" \
